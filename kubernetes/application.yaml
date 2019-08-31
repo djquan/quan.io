@@ -74,10 +74,10 @@ metadata:
 spec:
   tls:
     - hosts:
-        - ghost.quan.io
+        - quan.io
       secretName: letsencrypt-prod
   rules:
-    - host: ghost.quan.io
+    - host: quan.io
       http:
         paths:
           - backend:
