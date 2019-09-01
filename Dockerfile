@@ -10,6 +10,7 @@ RUN set -x && \
   apk del wget ca-certificates && \
   rm /var/cache/apk/*
 COPY . /site
+RUN ls /site
 WORKDIR /site
 RUN /usr/bin/hugo
 
