@@ -35,8 +35,8 @@ jobs:
     - name: Deploy
       run: 'kubectl apply -f kubernetes/application.yaml'
     - name: Wait for completion
-      run: 'kubectl rollout status deployment/quan-io'
+      run: 'kubectl rollout -n quan-io status deployment/quan-io'
       timeout-minutes: 8
     - name: Undo deployment
       if: failure()
-      run: 'kubectl rollout undo deployment/quan-io && exit 1'
+      run: 'kubectl rollout -n quan-io undo deployment/quan-io && exit 1'
