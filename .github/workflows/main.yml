@@ -25,6 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
+    - uses: actions/checkout@v1
     - uses: azure/k8s-actions/setup-kubectl@master
       with:
         version: v1.15.3
