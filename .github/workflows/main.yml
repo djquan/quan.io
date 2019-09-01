@@ -19,11 +19,11 @@ jobs:
     #   with:
     #     entrypoint: make
     #     args: build push
-    - uses: azure/k8s-actions/k8s-set-context@master
-      with:
-        k8s-url: ${{ secrets.K8S_URL }}
-        k8s-secret: ${{ secrets.K8S_TOKEN }}
-    - uses: azure/k8s-actions/setup-kubectl@master
-      id: install
+    # - uses: azure/k8s-actions/k8s-set-context@master
+    #   with:
+    #     k8s-url: ${{ secrets.K8S_URL }}
+    #     k8s-secret: ${{ secrets.K8S_TOKEN }}
+    # - uses: azure/k8s-actions/setup-kubectl@master
+    #   id: install
     - name: set sha
-      run: kubectl get pods -n quan-io
+      run: curl https://storage.googleapis.com/kubernetes-release/release/v1.15.0/bin/linux/amd64/kubectl
