@@ -30,4 +30,5 @@ jobs:
         k8s-url: ${{ secrets.K8S_URL }}
         k8s-secret: ${{ secrets.K8S_TOKEN }}
     - name: set sha
-      run: kubectl version
+      run: kubectl get pods -n quan-io
+
