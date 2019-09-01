@@ -21,7 +21,7 @@ jobs:
     #     args: build push
     - uses: azure/k8s-actions/setup-kubectl@master
       with:
-        version: v1.5.3
+        version: v1.15.3
       id: install
     - uses: azure/k8s-actions/k8s-set-context@master
       with:
