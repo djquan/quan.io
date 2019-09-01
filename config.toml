@@ -1,4 +1,4 @@
-baseurl = "https://quan.io"
+baseurl = "https://quan.io/"
 theme = "cocoa-eh"
 builddrafts = true
 canonifyurls = true
