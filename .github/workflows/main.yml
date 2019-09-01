@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: quan.io
 on:
   push:
     branches:
@@ -21,6 +21,8 @@ jobs:
       with:
         entrypoint: make
         args: build push
+  deploy:
+    needs: build
     - uses: azure/k8s-actions/setup-kubectl@master
       with:
         version: v1.15.3
