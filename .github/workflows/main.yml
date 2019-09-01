@@ -39,4 +39,4 @@ jobs:
       timeout-minutes: 8
     - name: Undo deployment
       if: failure()
-      run: 'kubectl rollout undo deployment/quan-io'
+      run: 'kubectl rollout undo deployment/quan-io && exit 1'
