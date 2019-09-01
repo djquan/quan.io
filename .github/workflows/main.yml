@@ -27,7 +27,7 @@ jobs:
        RUNNER_TOOLSDIRECTORY: ${HOME}
     - uses: azure/k8s-actions/k8s-set-context@master
       with:
-        k8s-url: ${{ secrets.K8S_URL }}
-        k8s-secret: ${{ secrets.K8S_TOKEN }}
+        k8s-url: "${{ secrets.K8S_URL }}"
+        k8s-secret: "${{ secrets.K8S_TOKEN }}"
     - name: get pods
-      run: 'kubectl get pods -n quan-io'
+      run: "kubectl get pods -n quan-io"
