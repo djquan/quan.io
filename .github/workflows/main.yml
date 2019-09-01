@@ -1,4 +1,4 @@
-name: Build
+name: Build and Deploy
 on:
   push:
     branches:
@@ -34,3 +34,9 @@ jobs:
       run: 'sed -ie "s/latest/$GITHUB_SHA/" kubernetes/application.yaml'
     - name: Deploy
       run: 'kubectl apply -f kubernetes/application.yaml'
+    - name: Wait for completion
+      run: 'kubectl rollout status deployment/quan-io'
+      timeout-minutes: 8
+    - name: Undo deployment
+      if: failure()
+      run: 'kubectl rollout undo deployment/quan-io'
