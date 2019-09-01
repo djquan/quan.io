@@ -25,8 +25,8 @@ jobs:
       with:
         version: v1.15.3
       env:
-       RUNNER_TEMPDIRECTORY: ${HOME}
-       RUNNER_TOOLSDIRECTORY: ${HOME}
+        RUNNER_TEMPDIRECTORY: ${RUNNER_TEMP}
+        RUNNER_TOOLSDIRECTORY: ${RUNNER_TOOL_CACHE}
     - uses: azure/k8s-actions/k8s-set-context@master
       with:
         kubeconfig: "${{ secrets.KUBECONFIG }}"
