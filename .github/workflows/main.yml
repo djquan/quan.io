@@ -30,4 +30,4 @@ jobs:
         k8s-url: ${{ secrets.K8S_URL }}
         k8s-secret: ${{ secrets.K8S_TOKEN }}
     - name: get pods
-      run: "kubectl get pods -n quan-io""
+      run: "kubectl get pods -n quan-io"
