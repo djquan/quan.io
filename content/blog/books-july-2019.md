@@ -9,7 +9,7 @@ draft: false
 * Mistborn: Alloy of Law
 * Mistobrn: Shadow of Self
 * Mistborn: Bands of Mourning
-* Craft COffee
+* Craft Coffee
 * Elantris
 * Warbreaker
 * Arcanum Unbounded
