@@ -42,6 +42,3 @@ jobs:
     - name: Wait for completion
       run: 'kubectl rollout -n quan-io status deployment/quan-io'
       timeout-minutes: 8
-    - name: Undo deployment
-      if: failure()
-      run: 'kubectl rollout -n quan-io undo deployment/quan-io && exit 1'
