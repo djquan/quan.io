@@ -9,7 +9,7 @@ publishdir = "public"
 author = "Dan Quan"
 title = "Dan Quan"
 pluralizelisttitles = false
-disableKinds = ["taxonomy", "taxonomyTerm"]
+disableKinds = []
 
 [permalinks]
 blog = "blog/:slug/"
@@ -33,6 +33,7 @@ usesmallsummarycard = true
 posts_navigation = true
 githubRepo = "djquan/quan.io/tree/master"
 small_banner_logo = false
+tagicons = true
 
 [params.utteranc]
 enable = true
