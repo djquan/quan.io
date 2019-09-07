@@ -125,7 +125,7 @@ It'll take some time to propagate.
 
 ## Private Docker Registry
 
-Kubernetes is a container management system, so we are going to need a place to keep our containers. There are many ways to approach this. [Gitlab](gitlab.com) has a free container registry. [Dockerhub](https://hub.docker.com/) offers a free private repository per account. [Github](https://github.com/features/package-registry) has an invite only beta registry.
+Kubernetes is a container management system, so we are going to need a place to keep our containers. There are many ways to approach this. [Gitlab](https://gitlab.com) has a free container registry. [Dockerhub](https://hub.docker.com/) offers a free private repository per account. [Github](https://github.com/features/package-registry) has an invite only beta registry.
 
 If you can `docker push` to a registry, feel free to skip to the next section. There are some advantages to controlling your own private docker registry, like having your images live in the same data center as your cluster. Those advantages likely do not outweigh managing another piece of infrastructure if you have an existing solution.
 
