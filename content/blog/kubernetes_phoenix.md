@@ -149,7 +149,108 @@ New lines in env vars and secrets have bitten me before, so, the `-n` is necessa
 - Next, create an authentication file: `htpasswd -cB htpasswd admin`, entering your password when the prompt tells you to. (Note, the `-B` is for bcrypt, and it's poorly documented that this is required for the Docker registry)
 - Create a kubernetes secret for all authentication: `kubectl create secret --namespace registry generic auth --from-file=./htpasswd --from-file=./access_key --from-file=./secret_key`
 
-Download a copy of the [registry kubernetes yaml file](https://github.com/djquan/kubernetes-phoenix/blob/master/kubernetes/registry.yaml) that I've created. Replace the values with a `REPLACE` comment.
+Create a registry.yaml with the following values:
+
+```yaml
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: registry
+  name: registry
+  namespace: registry
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: registry
+    spec:
+      containers:
+      - name: registry
+        image: registry:2
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "300m"
+          limits:
+            memory: "550Mi"
+            cpu: "350m"
+        ports:
+        - containerPort: 5000
+        env:
+          - name: REGISTRY_AUTH
+            value: "htpasswd"
+          - name: REGISTRY_AUTH_HTPASSWD_PATH
+            value: "/auth/htpasswd"
+          - name: REGISTRY_AUTH_HTPASSWD_REALM
+            value: "Registry Realm"
+          - name: REGISTRY_STORAGE
+            value: "s3"
+          - name: REGISTRY_STORAGE_S3_ACCESSKEY
+            valueFrom:
+              secretKeyRef:
+                name: auth
+                key: access_key
+          - name: REGISTRY_STORAGE_S3_BUCKET
+            value: "test-phoenix-kubernetes"  # REPLACE WITH YOUR OWN
+          - name: REGISTRY_STORAGE_S3_REGION
+            value: "sfo2" # REPLACE WITH YOUR REGION
+          - name: REGISTRY_STORAGE_S3_REGIONENDPOINT
+            value: "sfo2.digitaloceanspaces.com" # REPLACE WITH YOUR REGION ENDPOINT
+          - name: REGISTRY_STORAGE_S3_SECRETKEY
+            valueFrom:
+              secretKeyRef:
+                name: auth
+                key: secret_key
+        volumeMounts:
+          - name: auth
+            mountPath: /auth
+      volumes:
+        - name: auth
+          secret:
+            secretName: auth
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry
+  namespace: registry
+spec:
+  selector:
+    app: registry
+  ports:
+  - name: "5000"
+    port: 5000
+    targetPort: 5000
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: registry-ingress
+  namespace: registry
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+  - hosts:
+    - registry1234.mooo.com # REPLACE
+    secretName: letsencrypt-prod
+  rules:
+  - host: registry1234.mooo.com # REPLACE
+    http:
+      paths:
+      - backend:
+          serviceName: registry
+          servicePort: 5000
+```
+
+Replace the values where there is a # REPLACE comment with values from your registry.
 
 Ensure that the DNS entry you've created in the above section resolves to your EXTERNAL-IP with `dig HOSTNAME`. If this does not, wait until DNS propagation finishes (which can take a while), and then continue. Part of the next step is certificate issuing by let's encrypt, which needs to reach your kubernetes cluster via the hostname.
 
