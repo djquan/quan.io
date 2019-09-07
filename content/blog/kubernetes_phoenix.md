@@ -430,7 +430,7 @@ spec:
       restartPolicy: Never
 ```
 
-Run the migrations with: `kubectl apply -f migrate_job.yaml`. Then, run `kubectl get pods -n phoenix`. If all went well, you'll get output similar to:
+Replace the `image` value with your own image, and then run the migrations with: `kubectl apply -f migrate_job.yaml`. Then, run `kubectl get pods -n phoenix`. If all went well, you'll get output similar to:
 
 ```bash
 $ kubectl get pods -n phoenix
@@ -551,7 +551,7 @@ spec:
 
 ```
 
-Deploy the application with: `kubectl apply -f application.yaml`. Then, run `kubectl get pods -n phoenix`. If all went well, you'll have output that looks like this after a minute or two:
+Replace the `image` value with your image, and replace the hosts with the DNS entry you've obtained. Deploy the application with: `kubectl apply -f application.yaml`. Then, run `kubectl get pods -n phoenix`. If all went well, you'll have output that looks like this after a minute or two:
 
 ```text
 NAME                      READY   STATUS    RESTARTS   AGE
