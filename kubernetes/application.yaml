@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: quan-io
-  replicas: 1
+  replicas: 2
   strategy:
     rollingUpdate:
       maxUnavailable: 0
