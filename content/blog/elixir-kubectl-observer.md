@@ -1,5 +1,5 @@
 ---
-title: "A Guide to Using Erlang's Observer in Kubernetes for an Elixir Release"
+title: "Using Erlang's Observer in Kubernetes for an Elixir Release"
 date: 2019-09-02T15:25:13-07:00
 description: "A guide to using Erlang's observer in Kubernetes for an Elixir Release."
 tags: ["kubernetes", "elixir", "phoenix"]
