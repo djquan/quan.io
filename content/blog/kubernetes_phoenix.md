@@ -559,7 +559,7 @@ phoenix-679fbdbd5-4ws6q   1/1     Running   0          1m18s
 phoenix-679fbdbd5-5cwhz   1/1     Running   0          1m18s
 ```
 
-Your website should now be available at the dns address you've picked! In my case, it was available at `http://phoenix1234.mooo.com` (It is not there anymore.)
+Your website should now be available at the dns address you've picked! In my case, it was available at `https://phoenix1234.mooo.com` (It is not there anymore.)
 
 ## Next Steps
 
