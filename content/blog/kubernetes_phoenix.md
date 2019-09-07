@@ -18,7 +18,7 @@ The code I used in this guide lives [in github](https://github.com/djquan/kubern
 
 ## A Note About Costs
 
-You should be able to complete this tutorial for free: Digital Ocean and Google Cloud (and AWS, and Azure, and more) provide trial credits which should get you up and running. [This is my digital ocean referral link](https://m.do.co/c/bac4b0edfb0a) that should get you $50 in credits, which should be plenty for this tutorial. I believe Google Cloud also offers $300 for new accounts. This tutorial will be using Digital Ocean products, but you should be able to mix and match or find equivalent products. There are some ways to cut costs when running a Kubernetes cluster, which I will also try to call out.
+You should be able to complete this tutorial for free: Digital Ocean and Google Cloud (and AWS, and Azure, and more) provide trial credits which should get you up and running. [This is my digital ocean referral link](https://m.do.co/c/bac4b0edfb0a) that should get you $50 in credits, which should be plenty for this tutorial. I believe Google Cloud also offers $300 for new accounts. This tutorial, however, will only be using Digital Ocean products. There are some ways to cut costs when running a Kubernetes cluster, which I will also try to call out.
 
 There are completely free ways of playing around with Kubernetes locally, but it's been my experience that it's easier to learn on real Kubernetes clusters. If you have more than one old spare computer, building a Kubernetes cluster from those is enriching and fun, but using a managed Kubernetes solution lets you focus on deploying applications.
 
