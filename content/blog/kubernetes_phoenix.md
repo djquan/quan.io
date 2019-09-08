@@ -563,7 +563,7 @@ Your website should now be available at the dns address you've picked! In my cas
 
 ## Next Steps
 
-Hopefully things went smoothly for you! Please leave a comment if they did not, and [star the base repo](https://github.com/djquan/kubernetes-phoenix) if it did!
+Hopefully things went smoothly for you! Please leave a comment if they did not!
 
 There are a lot of exciting things you can do with your newly deployed application. Some ideas are:
 
