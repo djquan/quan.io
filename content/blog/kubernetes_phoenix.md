@@ -563,7 +563,7 @@ Your website should now be available at the dns address you've picked! In my cas
 
 ## Next Steps
 
-Hopefully things went smoothly for you! Please leave a comment if they did not!
+Hopefully things went smoothly for you! Please leave a comment if they did not! Remember to delete all your unused resources when you are done!
 
 There are a lot of exciting things you can do with your newly deployed application. Some ideas are:
 
