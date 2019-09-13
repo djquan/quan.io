@@ -4,6 +4,7 @@ date: 2019-09-06T18:43:51-07:00
 draft: false
 description: "A guide to Deploying Phoenix to Kubernetes completely from scratch."
 tags: ["kubernetes", "elixir", "phoenix"]
+best: true
 ---
 
 ## Introduction
