@@ -3,4 +3,4 @@
 	url = https://github.com/mtn/cocoa-eh-hugo-theme.git
 [submodule "themes/cocoa-eh-dq"]
 	path = themes/cocoa-eh-dq
-	url = https://github.com:djquan/cocoa-eh-hugo-theme.git
+	url = https://github.com/djquan/cocoa-eh-hugo-theme.git
