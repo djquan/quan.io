@@ -1,5 +1,5 @@
 baseurl = "https://quan.io/"
-theme = "cocoa-eh"
+theme = "cocoa-eh-dq"
 builddrafts = true
 canonifyurls = true
 contentdir = "content"
