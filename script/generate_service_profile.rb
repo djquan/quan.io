@@ -20,8 +20,8 @@ spec:
     name: GET /blog/
   - condition:
       method: GET
-      pathRegex: /img/favicon\.ico
-    name: GET /img/favicon.ico
+      pathRegex: /(img|js|fonts)/.*
+    name: GET /(img|js|fonts)/.*
 YAML
 
 Dir["content/blog/*"].each do |markdown|
