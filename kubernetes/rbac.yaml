@@ -10,8 +10,8 @@ metadata:
   name: deploy
   namespace: quan-io
 rules:
-  - apiGroups: ["extensions", "batch", ""]
-    resources: ["deployments", "jobs", "ingresses", "services", "pods"]
+  - apiGroups: ["extensions", "batch", "", "linkerd.io"]
+    resources: ["deployments", "jobs", "ingresses", "services", "pods", "serviceprofiles"]
     verbs: ["get","list","patch","update", "create", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
