@@ -26,6 +26,7 @@ jobs:
     needs: build
     steps:
     - uses: actions/checkout@v1
+    - uses: actions/setup-ruby@v1
     - uses: azure/k8s-actions/setup-kubectl@master
       with:
         version: v1.15.3
@@ -42,3 +43,5 @@ jobs:
     - name: Wait for completion
       run: 'kubectl rollout -n quan-io status deployment/quan-io'
       timeout-minutes: 8
+    - name: Update Linkerd Service Profile
+      run: 'ruby script/generate_service_profile.rb | kubectl apply -f -'
