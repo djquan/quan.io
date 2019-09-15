@@ -16,9 +16,7 @@ For more of my portfolio, check out my [github.](https://github.com/djquan)
 
 ## Side Projects
 
-[breath](https://breath.quan.io) - A toy task manager I made 6 years ago. I've kept it around, deployed, and updated to build good habbits around application maintenance. The source code can be found at [github](https://github.com/djquan/breath).
-
-[budget.sh](https://api.budget.sh) - This is my current, work in progress side project. It's an open source budgeting application. It's backend is written in Elixir and provides a graphql api.
+[budget.sh](https://budget.sh) - This is my current, work in progress side project. It's an open source budgeting application. It's [backend](https://api.budget.sh) is written in Elixir and provides a graphql api. It's frontend is written in Typescript and uses React.
 
 ## Proficiencies
 
