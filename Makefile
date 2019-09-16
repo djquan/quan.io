@@ -1,4 +1,4 @@
-BLOG_IMAGE := reg.quan.io/dan/quan.io
+BLOG_IMAGE := djquan/quan.io
 GITHUB_SHA ?= $(shell git rev-parse HEAD)
 
 build:

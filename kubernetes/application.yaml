@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: quan-io
-          image: reg.quan.io/dan/quan.io:latest
+          image: djquan/quan.io:latest
           resources:
             requests:
               memory: "300Mi"
@@ -47,8 +47,6 @@ spec:
             initialDelaySeconds: 0
             successThreshold: 1
             failureThreshold: 3
-      imagePullSecrets:
-        - name: regcred-reg-quan-io
 ---
 apiVersion: v1
 kind: Service
