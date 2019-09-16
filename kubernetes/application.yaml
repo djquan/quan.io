@@ -77,9 +77,16 @@ spec:
   tls:
     - hosts:
         - quan.io
+        - www.quan.io
       secretName: letsencrypt-prod
   rules:
     - host: quan.io
+      http:
+        paths:
+          - backend:
+              serviceName: quan-io-service
+              servicePort: 80
+    - host: www.quan.io
       http:
         paths:
           - backend:
