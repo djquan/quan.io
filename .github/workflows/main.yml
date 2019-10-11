@@ -17,7 +17,6 @@ jobs:
           DOCKER_REGISTRY_URL: ${{ secrets.DOCKER_REGISTRY_URL }}
         run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_REGISTRY_URL
       - name: Build and Push
-        uses: actions/action-builder/docker@master
         with:
           entrypoint: make
           args: build push
