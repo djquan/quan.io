@@ -10,11 +10,12 @@ jobs:
       - uses: actions/checkout@v1
         with:
           submodules: true
-      - name: Login
-        uses: actions/docker/login@master
+      - name: Docker Registry
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_REGISTRY_URL: ${{ secrets.DOCKER_REGISTRY_URL }}
+        run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_REGISTRY_URL
       - name: Build and Push
         uses: actions/action-builder/docker@master
         with:
