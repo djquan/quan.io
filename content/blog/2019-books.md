@@ -1,8 +1,10 @@
 ---
-title: "2019 Books"
+title: "Books Read in 2019"
 date: 2019-12-20T11:44:23-08:00
-draft: true
+draft: false
 ---
+
+62 books in total.
 
 * Lord of Chaos: Book Six of The Wheel of Time
 * The Fires of Heaven: Book Five of The Wheel of Time
