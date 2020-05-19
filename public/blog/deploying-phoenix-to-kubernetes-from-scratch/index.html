@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+<meta charset="utf-8">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="description" content="Software Engineer">
+
+
+<meta property="og:site_name" content="Dan Quan" />
+<meta property="og:locale" content="en-US" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://quan.io/blog/deploying-phoenix-to-kubernetes-from-scratch/" />
+<meta property="og:title" content="Deploying Phoenix to Kubernetes from Scratch" />
+<meta property="twitter:title" content="Deploying Phoenix to Kubernetes from Scratch">
+
+    <meta property="twitter:card" content="summary">
+
+<meta property="og:description" content="A guide to Deploying Phoenix to Kubernetes completely from scratch.">
+<meta property="twitter:description" content="A guide to Deploying Phoenix to Kubernetes completely from scratch.">
+
+<title>
+
+
+     Dan Quan - Deploying Phoenix to Kubernetes from Scratch 
+
+</title>
+<link rel="canonical" href="https://quan.io/blog/deploying-phoenix-to-kubernetes-from-scratch/">
+
+
+<style media="screen">
+  @font-face {
+  font-family: 'Nexa Bold';
+  src: url('https://quan.io/fonts/Nexa Bold.otf');
+}
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section, div.column {
+  display: block;
+}
+body {
+  line-height: 1;
+}
+ol, ul {
+  list-style: none;
+}
+blockquote, q {
+  quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+a,
+a:visited,
+a:focus,
+a:active {
+  text-decoration: none;
+}
+html {
+  height: 100%;
+  font-size: 16px;
+}
+body {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  -moz-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  -ms-align-items: center;
+  align-items: center;
+  -webkit-justify-content: flex-start;
+  -moz-justify-content: flex-start;
+  -ms-justify-content: flex-start;
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 100%;
+  font-weight: 400;
+  font-family: 'Helvetica Neue', 'Arial', sans-serif;
+  color: #111111;
+  line-height: 1.6;
+  text-rendering: optimizeLegibility !important;
+}
+.icon {
+  text-rendering: geometricPrecision !important;
+}
+section {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
+  display: flex;
+  -webkit-justify-content: center;
+  -moz-justify-content: center;
+  -ms-justify-content: center;
+  justify-content: center;
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  -ms-align-items: center;
+  align-items: center;
+  width: 100%;
+}
+div.column {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
+  display: flex;
+  -webkit-justify-content: center;
+  -moz-justify-content: center;
+  -ms-justify-content: center;
+  justify-content: center;
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  -ms-align-items: center;
+  align-items: center;
+  width: 100%;
+}
+.container {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
+  display: flex;
+  width: 100%;
+}
+div.header .container {
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  -ms-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  -moz-justify-content: center;
+  -ms-justify-content: center;
+  justify-content: center;
+}
+div.header .content {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  -moz-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  -ms-align-items: center;
+  align-items: center;
+}
+div.header .container .logo {
+  
+  max-width: 100px;
+  
+  margin-left: -2em;
+}
+div.header .name {
+  padding-top: 20px;
+  font-size: 28px;
+  font-family: 'Nexa Bold', 'Helvetica Neue', 'Arial', sans-serif;
+  letter-spacing: -0.005rem;
+  
+  text-transform: uppercase;
+  
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  font-smoothing: antialiased;
+  color: #333333;
+}
+div.header nav {
+  margin-bottom: 16px;
+}
+div.header nav ul {
+  list-style: none;
+  text-align: center;
+  display: -webkit-inline-flex;
+  display: -moz-inline-flex;
+  display: -ms-inline-flexbox;
+  display: -ms-inline-flex;
+  display: inline-flex;
+}
+div.header nav ul li {
+  margin-left: 6px;
+  margin-right: 6px;
+}
+div.header nav ul li:first-child {
+  margin-left: 0;
+}
+div.header nav ul li:last-child {
+  margin-right: 0;
+}
+div.header nav ul a {
+  color: #555555;
+  font-weight: 400;
+  font-size: 14px;
+  text-transform: uppercase;
+  font-family: 'Helvetica Neue', 'Arial', sans-serif;
+  -webkit-transition: color 0.1s cubic-bezier(0.47, 0, 0.75, 0.72);
+  -moz-transition: color 0.1s cubic-bezier(0.47, 0, 0.75, 0.72);
+  -ms-transition: color 0.1s cubic-bezier(0.47, 0, 0.75, 0.72);
+  -o-transition: color 0.1s cubic-bezier(0.47, 0, 0.75, 0.72);
+}
+div.header nav ul a:hover {
+  color: #111111;
+}
+div.footer .container {
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  -ms-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  -moz-justify-content: center;
+  -ms-justify-content: center;
+  justify-content: center;
+  flex-direction: column-reverse;
+  width: 100%;
+  text-align: center;
+}
+div.footer .container a {
+  font-size: 14px;
+  margin-left: 6px;
+  margin-right: 6px;
+  opacity: 0.6;
+  -webkit-transition: opacity 0.1s cubic-bezier(0.47, 0, 0.75, 0.72);
+  -moz-transition: opacity 0.1s cubic-bezier(0.47, 0, 0.75, 0.72);
+  -ms-transition: opacity 0.1s cubic-bezier(0.47, 0, 0.75, 0.72);
+  -o-transition: opacity 0.1s cubic-bezier(0.47, 0, 0.75, 0.72);
+}
+div.footer .container a:first-child {
+  margin-left: 0;
+}
+div.footer .container a:last-child {
+  margin-right: 0;
+}
+div.footer .container a:hover {
+  opacity: 0.8;
+}
+div.footer .container a .icon {
+  width: 16px;
+  height: 16px;
+}
+div.footer .container .copyright {
+  flex-grow: 0.5;
+  text-align: start;
+}
+div.footer .container .icons {
+  flex-grow: 0.5;
+  text-align: end;
+}
+div.main .container {
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  -ms-align-items: center;
+  align-items: center;
+  -webkit-justify-content: flex-start;
+  -moz-justify-content: flex-start;
+  -ms-justify-content: flex-start;
+  justify-content: flex-start;
+}
+div.main .content {
+  color: #111111;
+  font-size: 16px;
+}
+div.main .content .title-container {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
+  display: flex;
+  -webkit-justify-content: space-between;
+  -moz-justify-content: space-between;
+  -ms-justify-content: space-between;
+  justify-content: space-between;
+}
+div.main .content .posts {
+  
+  
+}
+div.main .content .page-heading {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: 'Helvetica Neue', 'Arial', sans-serif;
+  letter-spacing: -0.005rem;
+  text-transform: uppercase;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  font-smoothing: antialiased;
+  color: #333333;
+  margin-bottom: 16px;
+}
+div.main .content .front-matter .page-heading {
+  margin-bottom: 0;
+}
+div.main .content .front-matter .meta {
+  font-size: 14px;
+  color: #666666;
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
+  display: flex;
+  margin-bottom: 32px;
+}
+div.main .content .front-matter .date,
+div.main .content .front-matter .author,
+div.main .content .front-matter .tags,
+div.main .content .front-matter .word-count,
+div.main .content .front-matter .middot:before {
+  display: none;
+}
+div.main .content .front-matter .middot:before {
+  font-size: 6px;
+  margin: 0 6px;
+  vertical-align: middle;
+  content: "•";
+}
+div.main .content .front-matter .tags ul {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
+  display: flex;
+  -webkit-flex-direction: row;
+  -moz-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  -ms-align-items: center;
+  align-items: center;
+}
+div.main .content .front-matter .tags ul li {
+  -webkit-transition: opacity 0.1s cubic-bezier(0.47, 0, 0.75, 0.72);
+  -moz-transition: opacity 0.1s cubic-bezier(0.47, 0, 0.75, 0.72);
+  -ms-transition: opacity 0.1s cubic-bezier(0.47, 0, 0.75, 0.72);
+  -o-transition: opacity 0.1s cubic-bezier(0.47, 0, 0.75, 0.72);
+}
+div.main .content .front-matter .tags ul li:hover {
+  opacity: 0.7;
+}
+div.main .content .front-matter .tags ul li a {
+  color: #666666;
+}
+
+div.main .content .front-matter .tags.tag-icons .middot {
+  margin-left: 8px;
+}
+div.main .content .front-matter .tags.tag-icons .middot a {
+  display: inline-block;
+  padding: 0 5px;
+  background: #eee;
+  border-radius: 0 5px 5px 0;
+  position: relative;
+}
+div.main .content .front-matter .tags.tag-icons .middot a:after {
+  content: " ";
+  position: absolute;
+  right: 100%;
+  border-top: 11.2px solid transparent;
+  border-right: 11.2px solid #eee;
+  border-bottom: 11.2px solid transparent;
+}
+
+div.main .container.f04 {
+  -webkit-justify-content: center;
+  -moz-justify-content: center;
+  -ms-justify-content: center;
+  justify-content: center;
+}
+div.main .container.f04 .content {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  -moz-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  -ms-align-items: center;
+  align-items: center;
+}
+div.main .container.f04 .content .num {
+  margin: 30px 0px 30px 0;
+  font-weight: 400;
+  font-family: 'Helvetica Neue', 'Arial', sans-serif;
+  font-size: 50px;
+}
+div.main .container.f04 .content .detail {
+  margin-bottom: 40px;
+}
+div.main .container .content .groupby {
+  margin-top: 1em;
+  padding-left: 0.5em;
+}
+div.main .container .content .post-item {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
+  display: flex;
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  -ms-align-items: center;
+  align-items: center;
+  display: list-item;
+  list-style: disc inside;
+}
+div.main .container .content .post-item .meta {
+  font-size: 14px;
+  color: #666666;
+  display: none;
+  min-width: 100px;
+}
+div.main .container .content .see-more {
+  font-style: italic;
+  float: right;
+  font-size: 0.9em;
+  margin-top: 2em;
+  color: #313537;
+}
+div.main .container .content .see-more:hover {
+  color: #666;
+}
+section {
+  padding: 0 16px;
+}
+div.column {
+  padding: 0 16px;
+}
+div.header {
+  padding-top: 10px;
+}
+div.header-home {
+  padding-top: 36px;
+}
+div.main {
+  padding-top: 32px;
+}
+div.main .container .content .post-item .meta {
+    display: block;
+}
+div.main .container .content .post-item {
+    display: flex;
+    list-style: none;
+}
+a {
+  color: #428bca;
+  -webkit-transition: color 0.1s cubic-bezier(0.47, 0, 0.75, 0.72);
+  -moz-transition: color 0.1s cubic-bezier(0.47, 0, 0.75, 0.72);
+  -ms-transition: color 0.1s cubic-bezier(0.47, 0, 0.75, 0.72);
+  -o-transition: color 0.1s cubic-bezier(0.47, 0, 0.75, 0.72);
+}
+a:hover {
+  color: #2a6496;
+}
+img {
+  max-width: 100%;
+}
+div.main .content {
+    width: 100%;
+}
+div.main .content .markdown {
+  font-size: 1.1em;
+  line-height: 1.75em;
+  color: #313537;
+  font-family: serif;
+  font-weight: 300;
+}
+div.main .content .markdown h1,
+div.main .content .markdown h2,
+div.main .content .markdown h3,
+div.main .content .markdown h4,
+div.main .content .markdown h5,
+div.main .content .markdown h6 {
+  font-size: 22px;
+  font-family: 'Helvetica Neue', 'Arial', sans-serif;
+  letter-spacing: -0.005rem;
+  font-weight: 700;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  font-smoothing: antialiased;
+  color: #333333;
+  text-transform: none;
+  margin-top: 1.75rem;
+}
+div.main .content .markdown h1 {
+  font-size: 1.75rem;
+  margin-bottom: 2rem;
+}
+div.main .content .markdown h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+div.main .content .markdown h3 {
+  font-size: 1em;
+  margin-bottom: 1rem;
+}
+div.main .content .markdown h4,
+div.main .content .markdown h5,
+div.main .content .markdown h6 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  letter-spacing: none;
+}
+div.main .content .markdown code,
+div.main .content .markdown pre {
+  font-family: 'Menlo', monospace;
+  font-size: 0.98rem;
+  background-color: #f7f7f7;
+}
+div.main .content .markdown code {
+  /* enclosed by single backtick (`) */
+  padding: .15em .5em;
+  border-radius: 2px;
+}
+div.main .content .markdown pre {
+  /* Hugo specific: consider using the 'highlight' shortcode */
+  display: block;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  line-height: 1.5em;
+  white-space: pre;
+  word-break: break-all;
+  word-wrap: break-word;
+}
+div.main .content .markdown pre code {
+  /* enclosed by 4 backticks (````) */
+  padding: 0;
+  font-size: 0.9rem;
+}
+div.main .content .markdown a code {
+  color: #428bca !important;
+}
+div.main .content .markdown a code:hover {
+  text-decoration: underline;
+}
+div.main .content .markdown p {
+  
+  text-align: justify;
+  
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+div.main .content .markdown ul,
+div.main .content .markdown ol,
+div.main .content .markdown dl {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+}
+div.main .content .markdown dt {
+  font-weight: bold;
+}
+div.main .content .markdown dd {
+  margin-bottom: .5rem;
+}
+div.main .content .markdown ul {
+  list-style-type: disc;
+  list-style-position: outside;
+  margin-bottom: 1.25rem;
+}
+div.main .content .markdown ol {
+  list-style-type: decimal;
+  margin-bottom: 1.25rem;
+}
+div.main .content .markdown li {
+  margin-left: 2em;
+}
+div.main .content .markdown em {
+  font-style: italic;
+}
+div.main .content .markdown strong {
+  font-weight: 700;
+}
+div.main .content .markdown hr {
+  position: relative;
+  margin: 1.75rem 0;
+  border: 0;
+  border-top: 1px solid #808080;
+  border-top: 1px solid #999999;
+}
+div.main .content .markdown abbr {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #666666;
+  text-transform: uppercase;
+}
+div.main .content .markdown abbr[title] {
+  cursor: help;
+  border-bottom: 1px dotted #808080;
+}
+div.main .content .markdown blockquote {
+  padding: .5rem 1rem;
+  margin: .8rem 0;
+  color: #7a7a7a;
+  border-left: .25rem solid #e5e5e5;
+}
+div.main .content .markdown blockquote p:last-child {
+  margin-bottom: 0;
+}
+div.main .content .markdown figure {
+  width: 100%;
+  background: #fff;
+  margin-bottom: 1em;
+}
+div.main .content .markdown figure img {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  display: block;
+  position: static;
+  margin: auto;
+}
+div.main .content .markdown table {
+  margin-bottom: 1rem;
+  width: 100%;
+  border: 1px solid #e5e5e5;
+  border-collapse: collapse;
+}
+div.main .content .markdown td,
+div.main .content .markdown th {
+  padding: .25rem .5rem;
+  border: 1px solid #e5e5e5;
+}
+div.main .content .markdown tbody tr:nth-child(odd) td,
+div.main .content .markdown tbody tr:nth-child(odd) th {
+  background-color: #f7f7f7;
+}
+div.main .content .markdown .footnotes ol {
+  list-style-type: decimal;
+  margin-left: 16px;
+}
+div.main .content .markdown .footnotes li {
+  list-style-type: unset;
+}
+div.main .content .markdown .footnote-ref {
+  font-size: 0.7em;
+}
+div.main .content .navigation {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  -moz-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  -ms-align-items: center;
+  align-items: center;
+  padding: 2em;
+}
+div.main .content .navigation div {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
+  display: flex;
+  -webkit-flex-direction: row;
+  -moz-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  -ms-align-items: center;
+  align-items: center;
+  margin-top: 1em;
+}
+div.main .content .navigation .icon {
+  width: 16px;
+  height: 16px;
+}
+div.main .content .navigation a {
+  width: 250px;
+  margin: 0 1em;
+  text-align: center;
+  font-style: italic;
+  color: #313537;
+}
+div.main .content .share, div.main .content .share div {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
+  display: flex;
+  -webkit-flex-direction: row;
+  -moz-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  -ms-align-items: center;
+  align-items: center;
+  justify-content: center;
+}
+div.main .content .share {
+  background-color: rgba(152, 152, 152, 0.07);
+  padding: 1em 0;
+}
+div.main .content .share a {
+  margin: 0 6px;
+}
+kbd {
+  padding: 0.1em 0.6em;
+  border: 1px solid #ccc;
+  font-size: 11px;
+  font-family: Arial,Helvetica,sans-serif;
+  background-color: #f7f7f7;
+  color: #333;
+  -moz-box-shadow: 0 1px 0px rgba(0, 0, 0, 0.2),0 0 0 2px #ffffff inset;
+  -webkit-box-shadow: 0 1px 0px rgba(0, 0, 0, 0.2),0 0 0 2px #ffffff inset;
+  box-shadow: 0 1px 0px rgba(0, 0, 0, 0.2),0 0 0 2px #ffffff inset;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  display: inline-block;
+  margin: 0 0.1em;
+  text-shadow: 0 1px 0 #fff;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* Fonts */
+
+
+.wf-raleway-n4-active body, 
+.wf-raleway-n4-active div.header nav ul a,
+.wf-raleway-n7-active div.main .content .page-heading,
+.wf-raleway-n2-active div.main .container.f04 .content .num,
+.wf-raleway-n7-active div.main .content .markdown h1,
+.wf-raleway-n7-active div.main .content .markdown h2,
+.wf-raleway-n7-active div.main .content .markdown h3,
+.wf-raleway-n7-active div.main .content .markdown h4,
+.wf-raleway-n7-active div.main .content .markdown h5,
+.wf-raleway-n7-active div.main .content .markdown h6 {
+      font-family: 'Raleway';
+}
+
+.wf-merriweather-n3-active div.main .content .markdown {
+      font-family: 'Merriweather';
+}
+
+.wf-ubuntu-mono-n4-active div.main .content .markdown code,
+.wf-ubuntu-mono-n4-active div.main .content .markdown pre {
+      font-family: 'Ubuntu Mono';
+}
+
+
+</style>
+<style media="(min-width: 600px)">
+  body {
+-webkit-justify-content: center;
+-moz-justify-content: center;
+-ms-justify-content: center;
+justify-content: center;
+}
+.non-narrow.zero-top-spacing {
+padding-top: 0 !important;
+}
+section {
+padding: 0 16px;
+margin-left: 100px;
+margin-right: 100px;
+
+max-width: 750px;
+
+}
+div.column {
+padding: 0 16px;
+
+max-width: 750px;
+
+}
+div.header {
+background-color: transparent;
+}
+div.header .container {
+-webkit-justify-content: flex-start;
+-moz-justify-content: flex-start;
+-ms-justify-content: flex-start;
+justify-content: flex-start;
+}
+div.header .container .logo {
+margin: 0;
+}
+div.header-home .container .logo {
+max-width: 216px;
+margin-left: 24px;
+}
+div.header-home .name-home {
+padding-top: 30px;
+font-size: 40px;
+}
+div.header-home nav ul a {
+font-size: 18px;
+}
+div.header .content {
+-webkit-align-items: flex-start;
+-moz-align-items: flex-start;
+-ms-align-items: flex-start;
+align-items: flex-start;
+}
+div.header .name {
+color: #333333;
+}
+div.header nav {
+font-size: 14px;
+margin-bottom: 0;
+}
+div.header nav ul {
+text-align: left;
+}
+div.header nav ul a {
+color: #666666;
+}
+div.header nav ul a:hover {
+color: #333333;
+}
+div.footer {
+background-color: transparent;
+}
+div.footer .container {
+flex-direction: row;
+}
+div.footer .container a {
+margin-left: 3px;
+margin-right: 3px;
+color: #666666;
+}
+div.footer .container a:hover {
+color: #333333;
+}
+div.footer .container a .icon {
+font-size: 18px;
+}
+div.footer .container a .icon.larger {
+font-size: 20px;
+}
+div.main .content .front-matter .date,
+div.main .content .front-matter .author,
+div.main .content .front-matter .tags,
+div.main .content .front-matter .word-count,
+div.main .content .front-matter .middot:before {
+display: initial;
+}
+div.main .container.f04 {
+-webkit-justify-content: flex-start;
+-moz-justify-content: flex-start;
+-ms-justify-content: flex-start;
+justify-content: flex-start;
+}
+div.main .container.f04 .content {
+-webkit-align-items: flex-start;
+-moz-align-items: flex-start;
+-ms-align-items: flex-start;
+align-items: flex-start;
+}
+div.main .container.f04 .content .num {
+margin: 0 0 10px 0;
+font-size: 32px;
+}
+div.main .container.f04 .content .detail {
+margin-bottom: 30px;
+}
+.container {
+padding: 0 30px;
+}
+div.header {
+padding-top: 60px;
+padding-bottom: 60px;
+}
+div.footer {
+padding-top: 60px;
+padding-bottom: 60px;
+}
+div.main {
+padding-top: 0;
+}
+div.main .content {
+  
+  font-size: 16px;
+  
+}
+div.main .container .content .post-item {
+display: flex;
+list-style: none;
+padding-left: 1.5em;
+}
+div.main .container .content .post-item .meta {
+display: block;
+}
+div.main .content .markdown blockquote {
+padding-right: 5rem;
+padding-left: 1.25rem;
+}
+div.main .content .navigation {
+-webkit-flex-direction: row;
+-moz-flex-direction: row;
+-ms-flex-direction: row;
+flex-direction: row;
+}
+div.main .content .navigation div {
+margin-top: 0em;
+}
+
+</style>
+<style media="(min-width: 769px)">
+  div.main .content .markdown figure {
+width: 110%;
+margin-left: -4%;
+}
+div.main .content .markdown img {
+max-width: 110%;
+width: 110%;
+margin-left: -4%;
+}
+div.main .content .markdown pre {
+width: 110%;
+margin-left: -4%;
+}
+
+</style>
+
+<noscript>
+  <link href="https://fonts.googleapis.com/css?family=Raleway:400,600,700" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Merriweather:300,300i,700,700i" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700" rel="stylesheet">
+</noscript>
+
+
+  <style type="text/css" media="screen">
+    .hljs{display:block;background:white;padding:0.5em;color:#333333;overflow-x:auto}.hljs-comment,.hljs-meta{color:#969896}.hljs-string,.hljs-variable,.hljs-template-variable,.hljs-strong,.hljs-emphasis,.hljs-quote{color:#df5000}.hljs-keyword,.hljs-selector-tag,.hljs-type{color:#a71d5d}.hljs-literal,.hljs-symbol,.hljs-bullet,.hljs-attribute{color:#0086b3}.hljs-section,.hljs-name{color:#63a35c}.hljs-tag{color:#333333}.hljs-title,.hljs-attr,.hljs-selector-id,.hljs-selector-class,.hljs-selector-attr,.hljs-selector-pseudo{color:#795da3}.hljs-addition{color:#55a532;background-color:#eaffea}.hljs-deletion{color:#bd2c00;background-color:#ffecec}.hljs-link{text-decoration:underline}
+  </style>
+
+
+
+  <style type="text/css" media="screen">
+    .progressive{overflow:hidden;position:relative;background:#efefef}.progressive__img{width:100%;height:100%;transform:translateZ(0)}.progressive--not-loaded{filter:blur(30px)}.progressive--is-loaded{filter:blur(20px);animation:a .5s both}@keyframes a{0%{filter:blur(20px)}to{filter:blur(0)}}
+
+  </style>
+
+
+
+
+
+  <style type="text/css" media="screen">
+    a {
+    color: #527fc1f;
+}
+
+a:hover {
+    color: #1a3152;
+}
+
+div.main .content .markdown, div.header .name, div.header nav ul a:hover {
+    color: #181d2a;
+}
+
+div.header nav ul a {
+    color: #6a7a8b;
+}
+
+div.main .content .markdown code {
+    background-color: #f9f9f9;
+    color: #527fc1f;
+}
+
+div.main .content .markdown pre, div.main .content .markdown pre code {
+    background-color: #282a36;
+    color: #87a5d2;
+}
+
+.hljs, .hljs-subst, .hljs-variable {
+    color: #87a5d2;
+}
+
+.hljs-type {
+    color: #97d28b;
+}
+
+.hljs-quote {
+    color: #ffcb8d;
+}
+
+.hljs-string, .hljs-number, .hljs-selector-id, .hljs-selector-class, .hljs-template-tag, .hljs-deletion {
+    color: #96c2d7;
+}
+
+.hljs-comment {
+    color: #6a7a8b;
+}
+
+.hljs-regexp, .hljs-symbol, .hljs-template-variable {
+    color: #ffcb8d;
+}
+
+.hljs-keyword, .hljs-attribute, .hljs-meta-keyword, .hljs-doctag, .hljs-name {
+    color: #97d28b;
+}
+
+.hljs-link, .hljs-selector-attr, .hljs-selector-pseudo, .hljs-title, .hljs-section {
+    color: #ff8e91;
+}
+
+.hljs-built_in, .hljs-bullet, .hljs-code, .hljs-addition {
+    color: #97d28b;
+}
+
+.ssk {
+    background-color: #6a7a8b;
+}
+
+  </style>
+
+
+
+
+
+<link rel="shortcut icon"
+
+    href="https://quan.io/img/favicon.ico"
+
+>
+
+
+
+
+</head>
+
+
+<body>
+
+
+<div class="header column">
+
+    <div class="container">
+        
+        <div class="content">
+            <a href="https://quan.io/"><div class="name"><h1>Dan Quan</h1></div></a>
+            <nav>
+                <ul>
+                    
+                            <li><a href="https://quan.io/blog/">Blog</a></li>
+                    
+                    
+                        
+                            
+                        
+                    
+                    
+                        
+                            <li><a href="https://quan.io/about/">About</a></li>
+                        
+                    
+                        
+                    
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div class="main post non-narrow zero-top-spacing column">
+    <div class="container">
+        <div class="content">
+            <div class="front-matter">
+                <div class="title-container">
+                    <div class="page-heading">
+
+    
+    Deploying Phoenix to Kubernetes from Scratch
+    
+
+</div>
+
+                </div>
+                <div class="meta">
+                    <div class="date" title="Fri Sep 6 2019 18:43:51 PDT">Sep 6, 2019</div>
+                    
+                        
+                    
+                    
+                    <div class="reading-time middot">14 minute read</div>
+                    
+                    
+                      <div class="tags tag-icons">
+                    
+                        <ul>
+                          
+                            <li class="middot"><a href="https://quan.io/tags/kubernetes">kubernetes</a> </li>
+                          
+                            <li class="middot"><a href="https://quan.io/tags/elixir">elixir</a> </li>
+                          
+                            <li class="middot"><a href="https://quan.io/tags/phoenix">phoenix</a> </li>
+                          
+                        </ul>
+                    </div>
+                    <div class="tags">
+                        <ul>
+                          
+                          
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="markdown">
+                
+    
+    <h2 id="introduction">Introduction</h2>
+<p>Kubernetes is such an exciting technology, but it can be overwhelming when starting. There are many reasons to use Kubernetes, and likely an equal number of valid reasons to use something different. I don&rsquo;t have anything interesting or new to add to that debate though. I use Kubernetes <a href="https://braintreepayments.com/careers">at work</a> and for personal projects, and I love the options it gives me for deploying applications. There&rsquo;s an initial burden when getting the cluster set up and learning the basics, but deploying applications is easy and quick after.</p>
+<p>I highly recommend <a href="https://gigalixir.com">Gigalixir</a> if Kubernetes does not excite you, and all you want is a simple and reliable way to deploy a Phoenix application.</p>
+<p>This post is meant to be a complete guide for deploying a brand new Phoenix application to a brand new Kubernetes cluster. There are no pre-requisites to this, but I will call out places where you can substitute your existing solutions. I am not a Kubernetes or Elixir/Phoenix expert, so there are likely better ways of doing things. If you see such things, please leave a comment or <a href="https://github.com/djquan/quan.io/issues/new">open an issue</a>.</p>
+<p>The code I used in this guide lives <a href="https://github.com/djquan/kubernetes-phoenix">in github</a>, and can be used as a reference.</p>
+<h2 id="a-note-about-costs">A Note About Costs</h2>
+<p>You should be able to complete this tutorial for free: Digital Ocean and Google Cloud (and AWS, and Azure, and more) provide trial credits which should get you up and running. <a href="https://m.do.co/c/bac4b0edfb0a">This is my digital ocean referral link</a> that should get you $50 in credits, which should be plenty for this tutorial. I believe Google Cloud also offers $300 for new accounts. This tutorial, however, will only be using Digital Ocean products. There are some ways to cut costs when running a Kubernetes cluster, which I will also try to call out.</p>
+<p>There are completely free ways of playing around with Kubernetes locally, but it&rsquo;s been my experience that it&rsquo;s easier to learn on real Kubernetes clusters. If you have more than one old spare computer, building a Kubernetes cluster from those is enriching and fun, but using a managed Kubernetes solution lets you focus on deploying applications.</p>
+<h2 id="the-kubernetes-cluster">The Kubernetes Cluster</h2>
+<p>Digital Ocean provides a fantastic Kubernetes product. It lacks some of Google&rsquo;s bells and whistles, but it&rsquo;s cheaper and works really well. As mentioned above, you can use <a href="https://m.do.co/c/bac4b0edfb0a">my referral link</a> to get free credits. If you have a Kubernetes cluster already, you can skip to the next section.</p>
+<p>Once you create a new account, navigate to the <a href="https://cloud.digitalocean.com/kubernetes/clusters/new">Kubernetes cluster creation page</a>. Create a new cluster</p>
+<ul>
+<li>using the latest Kubernetes version</li>
+<li>in the region closest to you</li>
+<li>with 3 $10/month nodes. Digital Ocean does let you create a two node cluster, so this is an area to save money if high availability is not your primary concern.</li>
+</ul>
+<p>I&rsquo;ve named my cluster <code>test-phoenix-cluster</code>.</p>
+<p>It&rsquo;ll take a few minutes to start up your new Kubernetes cluster, so take this time to follow the <a href="https://www.digitalocean.com/docs/kubernetes/how-to/connect-to-cluster/">instructions on connecting to a Digital Ocean cluster</a>. This requires setting up <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">Kubectl</a> and <a href="https://github.com/digitalocean/doctl#installing-doctl">doctl</a>. Setting up <a href="https://github.com/ahmetb/kubectx">Kubectx and Kubens</a> is also recommended (but not strictly necessary).</p>
+<p>After your cluster is ready, run: <code>doctl kubernetes cluster kubeconfig save test-phoenix-cluster</code> to set up your config and authentication.</p>
+<p>When you are finished, you should be able to run the following and get similar results:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ kubectl get nodes
+NAME                STATUS   ROLES    AGE    VERSION
+phoenix-pool-bqk5   Ready    &lt;none&gt;   113s   v1.15.3
+phoenix-pool-bqkp   Ready    &lt;none&gt;   74s    v1.15.3
+phoenix-pool-bqks   Ready    &lt;none&gt;   80s    v1.15.3
+</code></pre></div><h2 id="nginx-ingress-with-lets-encrypt">Nginx Ingress with Let&rsquo;s Encrypt</h2>
+<p>Web Applications need to be accessible from outside of your cluster, and should be only accessible via HTTPS. We are going to accomplish this using <a href="https://github.com/kubernetes/ingress-nginx">NGINX Ingress</a> and <a href="https://github.com/jetstack/cert-manager">Cert-Manager</a>. <a href="https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nginx-ingress-with-cert-manager-on-digitalocean-kubernetes">This tutorial</a> was foundational in my understanding of how this worked.</p>
+<p>The basic idea of this section is to provide Kubernetes the ability to easily link your application&rsquo;s container with a load balancer, and automatically put a HTTPS reverse proxy in front of your application.</p>
+<p>First, let&rsquo;s get NGINX Ingress up and running.</p>
+<p>Run the following (taken from the <a href="https://kubernetes.github.io/ingress-nginx/deploy/">nginx ingress docs</a>):</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.25.1/deploy/static/mandatory.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.25.1/deploy/static/provider/cloud-generic.yaml
+</code></pre></div><p>The above commands request creation of a load balancer. In a few minutes, the load balancer should be created, and you should get something similar:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ kubectl get svc --namespace<span style="color:#f92672">=</span>ingress-nginx
+NAME            TYPE           CLUSTER-IP     EXTERNAL-IP       PORT<span style="color:#f92672">(</span>S<span style="color:#f92672">)</span>                      AGE
+ingress-nginx   LoadBalancer   10.245.83.98   178.128.128.176   80:31168/TCP,443:31958/TCP   2m41s
+</code></pre></div><p>Make note of the EXTERNAL-IP. We will reference that shortly.</p>
+<p>It&rsquo;s time to install cert-manager. Run the following (taken from <a href="https://docs.cert-manager.io/en/latest/getting-started/install/kubernetes.html">the cert manager docs</a>):</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl create namespace cert-manager
+kubectl label namespace cert-manager certmanager.k8s.io/disable-validation<span style="color:#f92672">=</span>true
+kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v0.10.0/cert-manager.yaml
+</code></pre></div><p>Next, create the following file named <code>prod_issuer.yaml</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#66d9ef">apiVersion</span>: certmanager.k8s.io/v1alpha1
+<span style="color:#66d9ef">kind</span>: ClusterIssuer
+<span style="color:#66d9ef">metadata</span>:
+  <span style="color:#66d9ef">name</span>: letsencrypt-prod
+<span style="color:#66d9ef">spec</span>:
+  <span style="color:#66d9ef">acme</span>:
+    <span style="color:#66d9ef">server</span>: https://acme-v02.api.letsencrypt.org/directory
+    <span style="color:#66d9ef">email</span>: YOUR_EMAIL_HERE
+    <span style="color:#66d9ef">privateKeySecretRef</span>:
+      <span style="color:#66d9ef">name</span>: letsencrypt-prod
+    <span style="color:#66d9ef">http01</span>: {}
+</code></pre></div><p>only replacing <code>YOUR_EMAIL_HERE</code> with your email. This is a necessary config file for cert-manager that let&rsquo;s you add annotations to automatically request certs from let&rsquo;s encrypt.</p>
+<p>Apply the file with <code>kubectl apply -f prod_issuer.yaml</code></p>
+<h2 id="dns">DNS</h2>
+<p>We need to point two things to domains you control: a private docker registry and your phoenix application. If you already have a domain you control, you should create two different A records pointing to your EXTERNAL-IP and skip to the next section.</p>
+<p>Create an account at <a href="https://freedns.afraid.org/subdomain">https://freedns.afraid.org</a>. This is free for what we want to do with it.</p>
+<p>When that is completed, create two <code>A</code> records at the <a href="https://freedns.afraid.org/subdomain/edit.php">subdomains</a> page.</p>
+<ul>
+<li>The type needs to be <code>A</code>.</li>
+<li>The subdomain can be whatever as long as you record it.</li>
+<li>The domain can be whatever as long as you record it.</li>
+<li>The destination should be the EXTERNAL-IP from above.</li>
+</ul>
+<p>In my case, the output of this page looks like:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">phoenix1234.mooo.com A 178.128.128.176
+registry1234.mooo.com A 178.128.128.176
+</code></pre></div><p>It&rsquo;ll take some time to propagate.</p>
+<h2 id="private-docker-registry">Private Docker Registry</h2>
+<p>Kubernetes is a container management system, so we are going to need a place to keep our containers. There are many ways to approach this. <a href="https://gitlab.com">Gitlab</a> has a free container registry. <a href="https://hub.docker.com/">Dockerhub</a> offers a free private repository per account. <a href="https://github.com/features/package-registry">Github</a> has an invite only beta registry.</p>
+<p>If you can <code>docker push</code> to a registry, feel free to skip to the next section. There are some advantages to controlling your own private docker registry, like having your images live in the same data center as your cluster. Those advantages likely do not outweigh managing another piece of infrastructure if you have an existing solution.</p>
+<p>First, create a <a href="https://cloud.digitalocean.com/spaces/new">Digital Ocean Space</a>. This is equivalent to S3, and will be the backing storage for our private registry.</p>
+<ul>
+<li>Try putting it in the same region your cluster is in</li>
+<li>CDN is not necessary</li>
+<li>Restrict File Listing</li>
+<li>Pick any name for the unique name, just make note of it. Mine is <code>test-phoenix-kubernetes</code></li>
+</ul>
+<p>After that has been created, create a new <a href="https://cloud.digitalocean.com/account/api/">spaces api key</a>. The top generated string is your access key, the bottom one is the secret key. Run the following with those values:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">echo -n YOUR_ACCESS_KEY &gt; access_key
+echo -n YOUR_SECRET_KEY &gt; secret_key
+</code></pre></div><p>New lines in env vars and secrets have bitten me before, so, the <code>-n</code> is necessary.</p>
+<ul>
+<li>Next, create a namespace for your registry with: <code>kubectl create namespace registry</code></li>
+<li>Next, create an authentication file: <code>htpasswd -cB htpasswd admin</code>, entering your password when the prompt tells you to. (Note, the <code>-B</code> is for bcrypt, and it&rsquo;s poorly documented that this is required for the Docker registry)</li>
+<li>Create a kubernetes secret for all authentication: <code>kubectl create secret --namespace registry generic auth --from-file=./htpasswd --from-file=./access_key --from-file=./secret_key</code></li>
+</ul>
+<p>Create a registry.yaml with the following values:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#66d9ef">apiVersion</span>: extensions/v1beta1
+<span style="color:#66d9ef">kind</span>: Deployment
+<span style="color:#66d9ef">metadata</span>:
+  <span style="color:#66d9ef">labels</span>:
+    <span style="color:#66d9ef">app</span>: registry
+  <span style="color:#66d9ef">name</span>: registry
+  <span style="color:#66d9ef">namespace</span>: registry
+<span style="color:#66d9ef">spec</span>:
+  <span style="color:#66d9ef">replicas</span>: <span style="color:#ae81ff">1</span>
+  <span style="color:#66d9ef">strategy</span>:
+    <span style="color:#66d9ef">type</span>: RollingUpdate
+  <span style="color:#66d9ef">template</span>:
+    <span style="color:#66d9ef">metadata</span>:
+      <span style="color:#66d9ef">labels</span>:
+        <span style="color:#66d9ef">app</span>: registry
+    <span style="color:#66d9ef">spec</span>:
+      <span style="color:#66d9ef">containers</span>:
+      - <span style="color:#66d9ef">name</span>: registry
+        <span style="color:#66d9ef">image</span>: registry:<span style="color:#ae81ff">2</span>
+        <span style="color:#66d9ef">resources</span>:
+          <span style="color:#66d9ef">requests</span>:
+            <span style="color:#66d9ef">memory</span>: <span style="color:#e6db74">&#34;512Mi&#34;</span>
+            <span style="color:#66d9ef">cpu</span>: <span style="color:#e6db74">&#34;300m&#34;</span>
+          <span style="color:#66d9ef">limits</span>:
+            <span style="color:#66d9ef">memory</span>: <span style="color:#e6db74">&#34;550Mi&#34;</span>
+            <span style="color:#66d9ef">cpu</span>: <span style="color:#e6db74">&#34;350m&#34;</span>
+        <span style="color:#66d9ef">ports</span>:
+        - <span style="color:#66d9ef">containerPort</span>: <span style="color:#ae81ff">5000</span>
+        <span style="color:#66d9ef">env</span>:
+          - <span style="color:#66d9ef">name</span>: REGISTRY_AUTH
+            <span style="color:#66d9ef">value</span>: <span style="color:#e6db74">&#34;htpasswd&#34;</span>
+          - <span style="color:#66d9ef">name</span>: REGISTRY_AUTH_HTPASSWD_PATH
+            <span style="color:#66d9ef">value</span>: <span style="color:#e6db74">&#34;/auth/htpasswd&#34;</span>
+          - <span style="color:#66d9ef">name</span>: REGISTRY_AUTH_HTPASSWD_REALM
+            <span style="color:#66d9ef">value</span>: <span style="color:#e6db74">&#34;Registry Realm&#34;</span>
+          - <span style="color:#66d9ef">name</span>: REGISTRY_STORAGE
+            <span style="color:#66d9ef">value</span>: <span style="color:#e6db74">&#34;s3&#34;</span>
+          - <span style="color:#66d9ef">name</span>: REGISTRY_STORAGE_S3_ACCESSKEY
+            <span style="color:#66d9ef">valueFrom</span>:
+              <span style="color:#66d9ef">secretKeyRef</span>:
+                <span style="color:#66d9ef">name</span>: auth
+                <span style="color:#66d9ef">key</span>: access_key
+          - <span style="color:#66d9ef">name</span>: REGISTRY_STORAGE_S3_BUCKET
+            <span style="color:#66d9ef">value</span>: <span style="color:#e6db74">&#34;test-phoenix-kubernetes&#34;</span>  <span style="color:#75715e"># REPLACE WITH YOUR OWN</span>
+          - <span style="color:#66d9ef">name</span>: REGISTRY_STORAGE_S3_REGION
+            <span style="color:#66d9ef">value</span>: <span style="color:#e6db74">&#34;sfo2&#34;</span> <span style="color:#75715e"># REPLACE WITH YOUR REGION</span>
+          - <span style="color:#66d9ef">name</span>: REGISTRY_STORAGE_S3_REGIONENDPOINT
+            <span style="color:#66d9ef">value</span>: <span style="color:#e6db74">&#34;sfo2.digitaloceanspaces.com&#34;</span> <span style="color:#75715e"># REPLACE WITH YOUR REGION ENDPOINT</span>
+          - <span style="color:#66d9ef">name</span>: REGISTRY_STORAGE_S3_SECRETKEY
+            <span style="color:#66d9ef">valueFrom</span>:
+              <span style="color:#66d9ef">secretKeyRef</span>:
+                <span style="color:#66d9ef">name</span>: auth
+                <span style="color:#66d9ef">key</span>: secret_key
+        <span style="color:#66d9ef">volumeMounts</span>:
+          - <span style="color:#66d9ef">name</span>: auth
+            <span style="color:#66d9ef">mountPath</span>: /auth
+      <span style="color:#66d9ef">volumes</span>:
+        - <span style="color:#66d9ef">name</span>: auth
+          <span style="color:#66d9ef">secret</span>:
+            <span style="color:#66d9ef">secretName</span>: auth
+---
+<span style="color:#66d9ef">apiVersion</span>: v1
+<span style="color:#66d9ef">kind</span>: Service
+<span style="color:#66d9ef">metadata</span>:
+  <span style="color:#66d9ef">name</span>: registry
+  <span style="color:#66d9ef">namespace</span>: registry
+<span style="color:#66d9ef">spec</span>:
+  <span style="color:#66d9ef">selector</span>:
+    <span style="color:#66d9ef">app</span>: registry
+  <span style="color:#66d9ef">ports</span>:
+  - <span style="color:#66d9ef">name</span>: <span style="color:#e6db74">&#34;5000&#34;</span>
+    <span style="color:#66d9ef">port</span>: <span style="color:#ae81ff">5000</span>
+    <span style="color:#66d9ef">targetPort</span>: <span style="color:#ae81ff">5000</span>
+---
+<span style="color:#66d9ef">apiVersion</span>: extensions/v1beta1
+<span style="color:#66d9ef">kind</span>: Ingress
+<span style="color:#66d9ef">metadata</span>:
+  <span style="color:#66d9ef">name</span>: registry-ingress
+  <span style="color:#66d9ef">namespace</span>: registry
+  <span style="color:#66d9ef">annotations</span>:
+    <span style="color:#66d9ef">kubernetes.io/ingress.class</span>: nginx
+    <span style="color:#66d9ef">nginx.ingress.kubernetes.io/proxy-body-size</span>: <span style="color:#e6db74">&#34;0&#34;</span>
+    <span style="color:#66d9ef">nginx.ingress.kubernetes.io/proxy-request-buffering</span>: <span style="color:#e6db74">&#34;off&#34;</span>
+    <span style="color:#66d9ef">certmanager.k8s.io/cluster-issuer</span>: letsencrypt-prod
+<span style="color:#66d9ef">spec</span>:
+  <span style="color:#66d9ef">tls</span>:
+  - <span style="color:#66d9ef">hosts</span>:
+    - registry1234.mooo.com <span style="color:#75715e"># REPLACE</span>
+    <span style="color:#66d9ef">secretName</span>: letsencrypt-prod
+  <span style="color:#66d9ef">rules</span>:
+  - <span style="color:#66d9ef">host</span>: registry1234.mooo.com <span style="color:#75715e"># REPLACE</span>
+    <span style="color:#66d9ef">http</span>:
+      <span style="color:#66d9ef">paths</span>:
+      - <span style="color:#66d9ef">backend</span>:
+          <span style="color:#66d9ef">serviceName</span>: registry
+          <span style="color:#66d9ef">servicePort</span>: <span style="color:#ae81ff">5000</span>
+</code></pre></div><p>Replace the values where there is a # REPLACE comment with values from your registry.</p>
+<p>Ensure that the DNS entry you&rsquo;ve created in the above section resolves to your EXTERNAL-IP with <code>dig HOSTNAME</code>. If this does not, wait until DNS propagation finishes (which can take a while), and then continue. Part of the next step is certificate issuing by let&rsquo;s encrypt, which needs to reach your kubernetes cluster via the hostname.</p>
+<p>Run <code>kubectl apply -f registry.yaml</code> with the changes you have made.</p>
+<p>After a minute or two, run <code>kubectl get pods -n registry</code> which should result in something similar to:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">NAME                        READY   STATUS    RESTARTS   AGE
+registry-dfd5d4c94-7kc2m    1/1     Running   0          14s
+</code></pre></div><p>If you see something like <code>cm-acme-http-solver</code>, that&rsquo;s fine! Wait a few minutes and run the same command, it shouldn&rsquo;t be there anymore.</p>
+<p>To verify that your registry is working, run:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker login YOUR_REGISTRY_HOSTNAME <span style="color:#75715e"># login with the username and password you created in the htpasswd command</span>
+docker pull elixir:1.9
+docker tag elixir:1.9 YOUR_REGISTRY_HOSTNAME/admin/elixir:1.9
+docker push YOUR_REGISTRY_HOSTNAME/admin/elixir:1.9
+</code></pre></div><h2 id="a-brief-note-about-troubleshooting">A Brief Note about Troubleshooting</h2>
+<p>If things are not working at any point, my go to debugging commands are: <code>kubectl get pods</code>, <code>kubectl logs POD-ID</code>, <code>kubectl describe pod POD-ID</code>, and those should hopefully give you enough output to begin searching for a fix.</p>
+<h2 id="creating-a-managed-database">Creating a Managed Database</h2>
+<p>Our Phoenix Application is going to be backed by a managed Postgres instance. <a href="https://cloud.digitalocean.com/databases/new">Navigate here</a> to create one. Pick a $15/month instance in the data center nearest you. It should take a few minutes to be provisioned.</p>
+<p>When it&rsquo;s done being created, add a user by clicking the &ldquo;Users &amp; Databases&rdquo; tab. It will auto generate a password for you. In my case, my user is <code>phoenix_test_project</code>. Record the auto-generated password somewhere. In a production system, you&rsquo;d want to create this user via the <code>psql</code> client, to be able to have fine control over their role&rsquo;s ability.</p>
+<p>Create a database via the UI on the same page called <code>phoenix_test_project</code> as well.</p>
+<p>Finally, go to the Settings tab, and add your Kubernetes cluster and your computer&rsquo;s IP address to the trusted sources section.</p>
+<p>Note: It&rsquo;s possible to deploy Postgres yourself on Kubernetes to save costs; I have not done this though, and prefer paying to not worry about managing it properly.</p>
+<h2 id="creating-a-phoenix-app">Creating a Phoenix App</h2>
+<p>It&rsquo;s finally time to create your Phoenix application! If you need help installing Phoenix and Elixir, <a href="https://hexdocs.pm/phoenix/installation.html#content">follow this guide</a>. Create your phoenix application with <code>mix phx.new kubernetes_phoenix</code> and <code>cd</code> into that directory.</p>
+<p>We&rsquo;re going to be using <a href="https://hexdocs.pm/mix/Mix.Tasks.Release.html">Elixir 1.9 releases</a> for this. The <a href="https://hexdocs.pm/phoenix/releases.html">Phoenix documentation</a> is very comprehensive, so turn to that if you want to dive deeper. Run <code>mix release.init</code> to generate some release helpers.</p>
+<p>As mentioned in the <a href="https://hexdocs.pm/phoenix/releases.html">phoenix documentation</a>, add this file at <code>lib/release.ex</code> to deal with migrations:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-elixir" data-lang="elixir">defmodule <span style="color:#a6e22e">KubernetesPhoenix.Release</span> do
+  <span style="color:#a6e22e">@app</span> <span style="color:#e6db74">:kubernetes_phoenix</span>
+
+  def migrate do
+    for repo <span style="color:#f92672">&lt;-</span> repos() do
+      {<span style="color:#e6db74">:ok</span>, _, _} <span style="color:#f92672">=</span> <span style="color:#a6e22e">Ecto.Migrator</span><span style="color:#f92672">.</span>with_repo(repo, <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">Ecto.Migrator</span><span style="color:#f92672">.</span>run(&amp;1, <span style="color:#e6db74">:up</span>, <span style="color:#e6db74">all</span>: true))
+    end
+  end
+
+  def rollback(repo, version) do
+    {<span style="color:#e6db74">:ok</span>, _, _} <span style="color:#f92672">=</span> <span style="color:#a6e22e">Ecto.Migrator</span><span style="color:#f92672">.</span>with_repo(repo, <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">Ecto.Migrator</span><span style="color:#f92672">.</span>run(&amp;1, <span style="color:#e6db74">:down</span>, <span style="color:#e6db74">to</span>: version))
+  end
+
+  defp repos do
+    <span style="color:#a6e22e">Application</span><span style="color:#f92672">.</span>load(<span style="color:#a6e22e">@app</span>)
+    {<span style="color:#e6db74">:ok</span>, _} <span style="color:#f92672">=</span> <span style="color:#a6e22e">Application</span><span style="color:#f92672">.</span>ensure_all_started(<span style="color:#a6e22e">@app</span>) <span style="color:#75715e"># This is not in the phoenix documentation, but it&#39;s necessary to ensure :ssl is started</span>
+    <span style="color:#a6e22e">Application</span><span style="color:#f92672">.</span>fetch_env!(<span style="color:#a6e22e">@app</span>, <span style="color:#e6db74">:ecto_repos</span>)
+  end
+end
+</code></pre></div><p>Also per the Phoenix documentation:</p>
+<ul>
+<li>Rename config/prod.secret.exs to config/releases.exs: <code>mv config/prod.secret.exs config/releases.exs</code></li>
+<li>In config/releases.exs, change <code>use Mix.Config</code> to <code>import Config</code></li>
+<li>Remove <code>import_config &quot;prod.secret.exs&quot;</code> from <code>prod.exs</code></li>
+<li>Uncomment <code>config :kubernetes_phoenix, KubernetesPhoenixWeb.Endpoint, server: true</code> from <code>releases.exs</code></li>
+<li>Uncomment <code>ssl: true,</code> from <code>releases.exs</code> for the Repo config.</li>
+<li>Add <code>:ssl</code> to the list of <code>extra_applications</code> in your <code>mix.exs</code> file, like this: <code>extra_applications: [:logger, :runtime_tools, :ssl]</code>. This is to ensure Ecto can talk to Postgres over SSL.</li>
+<li>Change &ldquo;example.com&rdquo; in <code>prod.exs</code> to the DNS name you chose earlier. Mine looks like <code>url: [host: &quot;phoenix1234.mooo.com&quot;, port: 80],</code>
+<ul>
+<li>Don&rsquo;t worry about the port: 80 in this section. We are using NGINX and Cert-Manager to ensure traffic is encrypted via TLS.</li>
+</ul>
+</li>
+</ul>
+<h2 id="secret-configurations">Secret Configurations</h2>
+<p>Let&rsquo;s create a Kubernetes namespace and generate some secrets our application will need:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl create namespace phoenix
+mix phx.gen.secret | tr -d <span style="color:#e6db74">&#34;\n&#34;</span> &gt; secret_key_base <span style="color:#75715e"># New lines are the worst.</span>
+echo -n <span style="color:#e6db74">&#34;ecto://USERNAME:PASSWORD@HOSTNAME:PORT/DATABASE&#34;</span> &gt; postgres_url
+<span style="color:#75715e"># for example, mine was echo -n &#34;ecto://phoenix_test_project:really_secure_password@private-test-phoenix-cluster-do-user-6447302-0.db.ondigitalocean.com:25060/phoenix_test_project&#34; &gt; postgres_url</span>
+kubectl create secret --namespace phoenix generic phoenix-secrets --from-file<span style="color:#f92672">=</span>./secret_key_base --from-file<span style="color:#f92672">=</span>./postgres_url
+</code></pre></div><p>We need to create a secret that allows Kubernetes to pull from our private registry. The following is from <a href="https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-secret-by-providing-credentials-on-the-command-line">the kubernetes docs</a>. Fill out the values for your private docker registry.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl create secret --namespace phoenix docker-registry regcred --docker-server<span style="color:#f92672">=</span>&lt;your-registry-server&gt; --docker-username<span style="color:#f92672">=</span>&lt;your-name&gt; --docker-password<span style="color:#f92672">=</span>&lt;your-pword&gt; --docker-email<span style="color:#f92672">=</span>&lt;your-email&gt;
+</code></pre></div><h2 id="creating-and-pushing-a-docker-image">Creating and Pushing a Docker Image</h2>
+<p>Add this Dockerfile to your application. (Taken from the <a href="https://hexdocs.pm/phoenix/releases.html">Phoenix Docs</a>)</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-docker" data-lang="docker"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> elixir:1.9.0-alpine as build</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> apk add --update build-base git npm<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> mkdir /app<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /app</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> mix local.hex --force <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    mix local.rebar --force<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> MIX_ENV<span style="color:#f92672">=</span>prod
+<span style="color:#66d9ef">COPY</span> mix.exs mix.lock ./<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> config config<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> mix deps.get<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> mix deps.compile<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> assets assets<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> cd assets <span style="color:#f92672">&amp;&amp;</span> npm install <span style="color:#f92672">&amp;&amp;</span> npm run deploy<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> mix phx.digest<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> priv priv<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> lib lib<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> mix compile<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> rel rel<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> mix release<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> alpine:3.9 AS app</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> apk add --update bash openssl<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> mkdir /app<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /app</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> --from<span style="color:#f92672">=</span>build /app/_build/prod/rel/kubernetes_phoenix ./<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> chown -R nobody: /app<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">USER</span><span style="color:#e6db74"> nobody</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> HOME<span style="color:#f92672">=</span>/app<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> [<span style="color:#e6db74">&#34;bin/kubernetes_phoenix&#34;</span>, <span style="color:#e6db74">&#34;start&#34;</span>]<span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p>Run the following, substituting <code>registry1234.mooo.com</code> with your private container registry:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build . -t registry1234.mooo.com/admin/kubernetes_phoenix:latest
+docker push registry1234.mooo.com/admin/kubernetes_phoenix:latest
+</code></pre></div><h2 id="database-migrations">Database Migrations</h2>
+<p>Our database migrations will be done with Kubernetes jobs. Create a migrate_job.yaml with the following:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#66d9ef">apiVersion</span>: batch/v1
+<span style="color:#66d9ef">kind</span>: Job
+<span style="color:#66d9ef">metadata</span>:
+  <span style="color:#66d9ef">name</span>: migrate-job-latest
+  <span style="color:#66d9ef">namespace</span>: phoenix
+<span style="color:#66d9ef">spec</span>:
+  <span style="color:#66d9ef">template</span>:
+    <span style="color:#66d9ef">spec</span>:
+      <span style="color:#66d9ef">containers</span>:
+        - <span style="color:#66d9ef">name</span>: migrate-latest
+          <span style="color:#66d9ef">image</span>: registry1234.mooo.com/admin/kubernetes_phoenix:latest <span style="color:#75715e"># use your own registry</span>
+          <span style="color:#66d9ef">command</span>:
+            [
+              <span style="color:#e6db74">&#34;bin/kubernetes_phoenix&#34;</span>,
+              <span style="color:#e6db74">&#34;eval&#34;</span>,
+              <span style="color:#e6db74">&#34;KubernetesPhoenix.Release.migrate&#34;</span>,
+            ]
+          <span style="color:#66d9ef">env</span>:
+            - <span style="color:#66d9ef">name</span>: DATABASE_URL
+              <span style="color:#66d9ef">valueFrom</span>:
+                <span style="color:#66d9ef">secretKeyRef</span>:
+                  <span style="color:#66d9ef">name</span>: phoenix-secrets
+                  <span style="color:#66d9ef">key</span>: postgres_url
+            - <span style="color:#66d9ef">name</span>: SECRET_KEY_BASE
+              <span style="color:#66d9ef">valueFrom</span>:
+                <span style="color:#66d9ef">secretKeyRef</span>:
+                  <span style="color:#66d9ef">name</span>: phoenix-secrets
+                  <span style="color:#66d9ef">key</span>: secret_key_base
+      <span style="color:#66d9ef">imagePullSecrets</span>:
+        - <span style="color:#66d9ef">name</span>: regcred
+      <span style="color:#66d9ef">restartPolicy</span>: Never
+</code></pre></div><p>Replace the <code>image</code> value with your own image, and then run the migrations with: <code>kubectl apply -f migrate_job.yaml</code>. Then, run <code>kubectl get pods -n phoenix</code>. If all went well, you&rsquo;ll get output similar to:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ kubectl get pods -n phoenix
+NAME                       READY   STATUS      RESTARTS   AGE
+migrate-job-latest-vgh6z   0/1     Completed   <span style="color:#ae81ff">0</span>          97s
+</code></pre></div><p>You can check the logs by using <code>kubectl logs -n phoenix POD-name</code>, like:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ kubectl logs -n phoenix migrate-job-latest-vgh6z
+21:00:47.312 <span style="color:#f92672">[</span>info<span style="color:#f92672">]</span> Running KubernetesPhoenixWeb.Endpoint with cowboy 2.6.3 at :::4000 <span style="color:#f92672">(</span>http<span style="color:#f92672">)</span>
+21:00:47.324 <span style="color:#f92672">[</span>info<span style="color:#f92672">]</span> Access KubernetesPhoenixWeb.Endpoint at http://phoenix1234.mooo.com
+21:00:47.683 <span style="color:#f92672">[</span>info<span style="color:#f92672">]</span> Already up
+</code></pre></div><p>Delete the job after it completes: <code>kubectl delete -f migrate_job.yaml</code></p>
+<h2 id="running-the-application">Running the Application</h2>
+<p>Create an <code>application.yaml</code> that has the following:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">---
+<span style="color:#66d9ef">apiVersion</span>: extensions/v1beta1
+<span style="color:#66d9ef">kind</span>: Deployment
+<span style="color:#66d9ef">metadata</span>:
+  <span style="color:#66d9ef">name</span>: phoenix
+  <span style="color:#66d9ef">namespace</span>: phoenix
+<span style="color:#66d9ef">spec</span>:
+  <span style="color:#66d9ef">selector</span>:
+    <span style="color:#66d9ef">matchLabels</span>:
+      <span style="color:#66d9ef">app</span>: phoenix
+  <span style="color:#66d9ef">replicas</span>: <span style="color:#ae81ff">2</span>
+  <span style="color:#66d9ef">strategy</span>:
+    <span style="color:#66d9ef">rollingUpdate</span>:
+      <span style="color:#66d9ef">maxUnavailable</span>: <span style="color:#ae81ff">1</span>
+      <span style="color:#66d9ef">maxSurge</span>: <span style="color:#ae81ff">2</span>
+    <span style="color:#66d9ef">type</span>: RollingUpdate
+  <span style="color:#66d9ef">template</span>:
+    <span style="color:#66d9ef">metadata</span>:
+      <span style="color:#66d9ef">labels</span>:
+        <span style="color:#66d9ef">app</span>: phoenix
+    <span style="color:#66d9ef">spec</span>:
+      <span style="color:#66d9ef">containers</span>:
+        - <span style="color:#66d9ef">name</span>: phoenix
+          <span style="color:#66d9ef">image</span>: registry1234.mooo.com/admin/kubernetes_phoenix:latest <span style="color:#75715e"># use your own registry</span>
+          <span style="color:#66d9ef">resources</span>:
+            <span style="color:#66d9ef">requests</span>:
+              <span style="color:#66d9ef">memory</span>: <span style="color:#e6db74">&#34;512Mi&#34;</span>
+              <span style="color:#66d9ef">cpu</span>: <span style="color:#e6db74">&#34;300m&#34;</span>
+            <span style="color:#66d9ef">limits</span>:
+              <span style="color:#66d9ef">memory</span>: <span style="color:#e6db74">&#34;550Mi&#34;</span>
+              <span style="color:#66d9ef">cpu</span>: <span style="color:#e6db74">&#34;350m&#34;</span>
+          <span style="color:#66d9ef">ports</span>:
+            - <span style="color:#66d9ef">containerPort</span>: <span style="color:#ae81ff">4000</span>
+          <span style="color:#66d9ef">livenessProbe</span>:
+            <span style="color:#66d9ef">httpGet</span>:
+              <span style="color:#66d9ef">path</span>: /
+              <span style="color:#66d9ef">port</span>: <span style="color:#ae81ff">4000</span>
+            <span style="color:#66d9ef">initialDelaySeconds</span>: <span style="color:#ae81ff">45</span>
+            <span style="color:#66d9ef">successThreshold</span>: <span style="color:#ae81ff">1</span>
+            <span style="color:#66d9ef">failureThreshold</span>: <span style="color:#ae81ff">3</span>
+          <span style="color:#66d9ef">readinessProbe</span>:
+            <span style="color:#66d9ef">httpGet</span>:
+              <span style="color:#66d9ef">path</span>: /
+              <span style="color:#66d9ef">port</span>: <span style="color:#ae81ff">4000</span>
+            <span style="color:#66d9ef">initialDelaySeconds</span>: <span style="color:#ae81ff">0</span>
+            <span style="color:#66d9ef">successThreshold</span>: <span style="color:#ae81ff">1</span>
+            <span style="color:#66d9ef">failureThreshold</span>: <span style="color:#ae81ff">3</span>
+          <span style="color:#66d9ef">env</span>:
+            - <span style="color:#66d9ef">name</span>: DATABASE_URL
+              <span style="color:#66d9ef">valueFrom</span>:
+                <span style="color:#66d9ef">secretKeyRef</span>:
+                  <span style="color:#66d9ef">name</span>: phoenix-secrets
+                  <span style="color:#66d9ef">key</span>: postgres_url
+            - <span style="color:#66d9ef">name</span>: SECRET_KEY_BASE
+              <span style="color:#66d9ef">valueFrom</span>:
+                <span style="color:#66d9ef">secretKeyRef</span>:
+                  <span style="color:#66d9ef">name</span>: phoenix-secrets
+                  <span style="color:#66d9ef">key</span>: secret_key_base
+      <span style="color:#66d9ef">imagePullSecrets</span>:
+        - <span style="color:#66d9ef">name</span>: regcred
+---
+<span style="color:#66d9ef">apiVersion</span>: v1
+<span style="color:#66d9ef">kind</span>: Service
+<span style="color:#66d9ef">metadata</span>:
+  <span style="color:#66d9ef">name</span>: phoenix-service
+  <span style="color:#66d9ef">namespace</span>: phoenix
+<span style="color:#66d9ef">spec</span>:
+  <span style="color:#66d9ef">selector</span>:
+    <span style="color:#66d9ef">app</span>: phoenix
+  <span style="color:#66d9ef">ports</span>:
+    - <span style="color:#66d9ef">protocol</span>: TCP
+      <span style="color:#66d9ef">port</span>: <span style="color:#ae81ff">4000</span>
+      <span style="color:#66d9ef">name</span>: web
+---
+<span style="color:#66d9ef">apiVersion</span>: extensions/v1beta1
+<span style="color:#66d9ef">kind</span>: Ingress
+<span style="color:#66d9ef">metadata</span>:
+  <span style="color:#66d9ef">name</span>: phoenix-ingress
+  <span style="color:#66d9ef">namespace</span>: phoenix
+  <span style="color:#66d9ef">annotations</span>:
+    <span style="color:#66d9ef">kubernetes.io/ingress.class</span>: nginx
+    <span style="color:#66d9ef">certmanager.k8s.io/cluster-issuer</span>: letsencrypt-prod
+<span style="color:#66d9ef">spec</span>:
+  <span style="color:#66d9ef">tls</span>:
+    - <span style="color:#66d9ef">hosts</span>:
+        - phoenix1234.mooo.com  <span style="color:#75715e"># Use your own hostname</span>
+      <span style="color:#66d9ef">secretName</span>: letsencrypt-prod
+  <span style="color:#66d9ef">rules</span>:
+    - <span style="color:#66d9ef">host</span>: phoenix1234.mooo.com <span style="color:#75715e"># Use your own hostname</span>
+      <span style="color:#66d9ef">http</span>:
+        <span style="color:#66d9ef">paths</span>:
+          - <span style="color:#66d9ef">backend</span>:
+              <span style="color:#66d9ef">serviceName</span>: phoenix-service
+              <span style="color:#66d9ef">servicePort</span>: <span style="color:#ae81ff">4000</span>
+
+</code></pre></div><p>Replace the <code>image</code> value with your image, and replace the hosts with the DNS entry you&rsquo;ve obtained. Deploy the application with: <code>kubectl apply -f application.yaml</code>. Then, run <code>kubectl get pods -n phoenix</code>. If all went well, you&rsquo;ll have output that looks like this after a minute or two:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">NAME                      READY   STATUS    RESTARTS   AGE
+phoenix-679fbdbd5-4ws6q   1/1     Running   0          1m18s
+phoenix-679fbdbd5-5cwhz   1/1     Running   0          1m18s
+</code></pre></div><p>Your website should now be available at the dns address you&rsquo;ve picked! In my case, it was available at <code>https://phoenix1234.mooo.com</code> (It is not there anymore.)</p>
+<h2 id="next-steps">Next Steps</h2>
+<p>Hopefully things went smoothly for you! Please leave a comment if they did not! Remember to delete all your unused resources when you are done!</p>
+<p>There are a lot of exciting things you can do with your newly deployed application. Some ideas are:</p>
+<ul>
+<li><a href="https://www.digitalocean.com/docs/kubernetes/how-to/monitor-advanced/">Use Digital Ocean&rsquo;s Advanced Metrics</a></li>
+<li><a href="https://linkerd.io/">Install Linkerd</a></li>
+<li>Use <a href="https://github.com/bitwalker/libcluster">Libcluster</a> to get Erlang node clustering working. It&rsquo;s not hard! Take a look at <a href="https://github.com/djquan/budget.sh/commit/e08e893ee76df9e1c47805f562d58d9f6342ed7a">this commit</a> for some guidance.</li>
+<li><a href="https://quan.io/blog/using-erlangs-observer-in-kubernetes-for-an-elixir-release/">Get Observer</a> working</li>
+<li><a href="https://github.com/djquan/budget.sh/blob/7b445a77fc7cd2b2954ea50506f2fc8585aa9949/.github/workflows/main.yml#L39-L83">Get Continuos Delivery</a> working in your CI platform</li>
+</ul>
+
+
+            </div>
+            
+            
+            <br>
+            <div class="navigation">
+                
+                <div>
+                    <img class="icon" src="https://quan.io/img/back.svg" alt="back" />
+                    <a href="https://quan.io/blog/using-erlangs-observer-in-kubernetes-for-an-elixir-release/">Using Erlang&#39;s Observer in Kubernetes for an Elixir Release</a>
+                </div>
+                
+                <div style="width: 100%;"></div>
+                
+                <div>
+                    <a href="https://quan.io/blog/books-read-in-2019/">Books Read in 2019</a>
+                    <img class="icon" src="https://quan.io/img/next.svg" alt="next" />
+                </div>
+                
+            </div>
+            
+            
+
+            
+            
+            <div class="post bg-white">
+                <script src="https://utteranc.es/client.js"
+                    repo= "djquan/quan.io"
+                    issue-term="title"
+                    theme="github-light"
+                    crossorigin="anonymous"
+                    async>
+                </script>
+            </div>
+            
+
+            
+
+            
+        </div>
+    </div>
+</div>
+
+
+
+<div class="footer column">
+    <div class="container">
+
+        
+            <div class="copyright">
+            
+            
+                <a href="https://github.com/djquan/quan.io/tree/master/content/blog/kubernetes_phoenix.md" target="_blank">View this post on GitHub</a>
+            
+            </div>
+        
+
+        
+
+        <div class="copyright">
+
+        
+            
+                <a href="https://creativecommons.org/licenses/by-sa/4.0/">Copyright © 2019 Dan Quan</a>
+            
+        
+
+        </div>
+        <div class="icons">
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+            <a href="https://github.com/djquan" rel=me target="_blank">
+                <img class="icon" src="https://quan.io/img/github.svg" alt="github" />
+            </a>
+        
+
+        
+
+        
+            <a href="https://www.linkedin.com/in/dquan" rel=me target="_blank">
+                <img class="icon" src="https://quan.io/img/linkedin.svg" alt="linkedin" />
+            </a>
+        
+
+        
+
+        
+
+        
+            <a href="mailto:dan@quan.io">
+                <img class="icon" src="https://quan.io/img/email.svg" alt="email" />
+            </a>
+        
+
+        
+            <a href="https://quan.io/index.xml">
+                <img class="icon" src="https://quan.io/img/rss.svg" alt="rss" />
+            </a>
+        
+
+        </div>
+    </div>
+</div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
+<script>
+  WebFont.load({
+    google: {
+      families: ['Raleway:400,600,700', 'Merriweather:300,300i,700,700i', 'Ubuntu+Mono:400,700']
+    }
+  });
+</script>
+
+
+
+  <script src="https://quan.io/js/highlight.min.js" defer></script>
+  
+
+
+
+  <script src="https://quan.io/js/progressively.min.js" defer></script>
+
+
+
+
+
+
+
+
+<script>
+  window.onload = function() {
+    
+      hljs.initHighlighting();
+    
+    
+      progressively.init({delay: 30, throttle: 50});
+    
+    
+  };
+</script>
+
+
+
+
+</body>
+</html>
+

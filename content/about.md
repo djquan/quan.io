@@ -22,5 +22,6 @@ For more of my portfolio, check out my [github.](https://github.com/djquan)
 
 * Ruby (and Ruby on Rails)
 * Java
+* Go
 * Elixir
 * Kubernetes
