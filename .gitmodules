@@ -4,3 +4,7 @@
 [submodule "themes/cocoa-eh-dq"]
 	path = themes/cocoa-eh-dq
 	url = https://github.com/djquan/cocoa-eh-hugo-theme.git
+[submodule "public"]
+	path = public
+	url = git@github.com:djquan/djquan.github.io.git
+	branch = master
